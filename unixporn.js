@@ -1,20 +1,20 @@
 const fs = require("fs");
 const axios = require("axios");
-const cheerio = require("cheerio");
+const { load } = require("cheerio");
 const url = "https://old.reddit.com/r/unixporn/new";
 let posts = [];
 // let page = 1; /*testing*/
 
 async function getImage(postLink) {
   const { data } = await axios(postLink);
-  const $ = cheerio.load(data);
+  const $ = load(data);
   return $("a.post-link").attr("href");
 }
 
 (async function run(url) {
   try {
     const { data } = await axios(url);
-    const $ = cheerio.load(data);
+    const $ = load(data);
     $(".thing.linkflair.link").each(async (i, e) => {
       const title = $(e)
         .find(".entry.unvoted .top-matter .title .title")

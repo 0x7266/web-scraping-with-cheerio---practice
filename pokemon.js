@@ -15,7 +15,7 @@ let totalPages = async () => {
     const response = await getData(url);
     const $ = cheerio.load(response);
     const lastPage = $("nav > ul").find("li").eq(-2).text();
-    return 2;
+    return lastPage;
   } catch (error) {
     console.error(error);
   }
@@ -47,7 +47,7 @@ let totalPages = async () => {
     run();
     // console.log(pokemons);
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
   }
 })();
 

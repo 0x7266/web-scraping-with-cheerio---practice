@@ -1,13 +1,13 @@
 const fs = require("fs");
 const axios = require("axios");
-const cheerio = require("cheerio");
+const { load } = require("cheerio");
 const url = "https://books.toscrape.com/";
 let page = 1;
 const books = [];
 (async (url) => {
   try {
-    const response = await axios(url);
-    const $ = cheerio.load(response.data);
+    const { data } = await axios(url);
+    const $ = load(data);
     console.log($);
     $("article").each(async (i, e) => {
       const title = $(e).find("h3 a").text();
