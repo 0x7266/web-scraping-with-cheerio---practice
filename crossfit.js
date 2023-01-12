@@ -7,7 +7,7 @@ const wods = [];
 const d = new Date();
 let currentMonth = d.getMonth() + 1;
 let currentYear = d.getFullYear();
-let month = 11; // 0 = january, 1 = february, (...), 11 = december
+let month = 10;
 let year = 2022;
 
 async function getWod(url) {
@@ -25,11 +25,6 @@ async function getWod(url) {
         date: { year, month, day },
       });
     });
-    // console.log(wods.sort((a, b) => parseInt(a.id) - parseInt(b.id)));
-    // fs.writeFileSync(
-    //   "./data/crossfit.json",
-    //   JSON.stringify(wods.sort((a, b) => b.createdAt - a.createdAt))
-    // );
   } catch (error) {
     console.error(error.message);
   }
@@ -37,34 +32,29 @@ async function getWod(url) {
 
 (async function run() {
   if (year <= currentYear) {
-    if (year === currentYear && month > currentMonth) {
-      console.log(year);
-      console.log(month);
-      console.log("Not found");
-      return;
-    }
     if (month <= 12) {
       await getWod(
         `${url}${year}/${month.toString().length === 1 ? `0${month}` : month}`
       );
       month++;
       if (year === currentYear && month > currentMonth) {
+        console.log(year);
+        console.log(month);
+        console.log(wods.length);
+        console.log("All wods already scraped");
+        fs.writeFileSync(
+          "./data/wods.json",
+          JSON.stringify({
+            count: wods.length,
+            wods: wods.sort((a, b) => parseInt(a.id) - parseInt(b.id)),
+          })
+        );
         return;
       }
       await run();
     }
-
     year++;
     month = 1;
     await run();
   }
-  //   console.log(wods);
-  console.log(wods.length);
-  fs.writeFileSync(
-    "./data/wods.json",
-    JSON.stringify({
-      count: wods.length,
-      wods: wods.sort((a, b) => parseInt(a.id) - parseInt(b.id)),
-    })
-  );
 })();
