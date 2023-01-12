@@ -1,13 +1,13 @@
 const fs = require("fs");
 const axios = require("axios");
-const { load } = require("cheerio");
+// const { load } = require("cheerio");
 const url = "https://crossfit.com/workout/";
 const wods = [];
 
 const d = new Date();
-let currentMonth = d.getMonth();
+let currentMonth = d.getMonth() + 1;
 let currentYear = d.getFullYear();
-let month = 0; // 0 = january, 1 = february, (...), 11 = december
+let month = 11; // 0 = january, 1 = february, (...), 11 = december
 let year = 2022;
 
 async function getWod(url) {
@@ -15,11 +15,14 @@ async function getWod(url) {
     console.log(url);
     const { data } = await axios(url);
     data.wods.map((w, i) => {
+      const year = w.cleanID.slice(0, 4);
+      const month = w.cleanID.slice(4, 6);
+      const day = w.cleanID.slice(6);
       wods.push({
         id: w.cleanID,
         title: w.title,
         wod: w.wodRaw,
-        createdAt: w.publishedOn,
+        date: { year, month, day },
       });
     });
     // console.log(wods.sort((a, b) => parseInt(a.id) - parseInt(b.id)));
@@ -34,33 +37,34 @@ async function getWod(url) {
 
 (async function run() {
   if (year <= currentYear) {
-    if (year === currentYear && month > currentMonth + 1) {
+    if (year === currentYear && month > currentMonth) {
       console.log(year);
       console.log(month);
       console.log("Not found");
       return;
     }
-    if (month < 12) {
+    if (month <= 12) {
       await getWod(
-        `${url}${year}/${
-          (month + 1).toString().length === 1 ? `0${month + 1}` : month + 1
-        }`
+        `${url}${year}/${month.toString().length === 1 ? `0${month}` : month}`
       );
-      if (year === currentYear && month > currentMonth + 1) {
+      month++;
+      if (year === currentYear && month > currentMonth) {
         return;
       }
-      month++;
       await run();
     }
-    while (year < currentYear) {
-      year++;
-      month = 0;
-      await run();
-    }
+
+    year++;
+    month = 1;
+    await run();
   }
+  //   console.log(wods);
   console.log(wods.length);
   fs.writeFileSync(
     "./data/wods.json",
-    JSON.stringify({ count: wods.length, wods })
+    JSON.stringify({
+      count: wods.length,
+      wods: wods.sort((a, b) => parseInt(a.id) - parseInt(b.id)),
+    })
   );
 })();
