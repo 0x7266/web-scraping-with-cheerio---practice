@@ -5,12 +5,12 @@ const url = "https://scrapeme.live/shop/";
 let page = 1;
 const pokemons = [];
 
-const getData = async (url) => {
+async function getData(url) {
   const { data } = await axios(url);
   return data;
-};
+}
 
-let totalPages = async () => {
+async function totalPages() {
   try {
     const response = await getData(url);
     const $ = cheerio.load(response);
@@ -19,7 +19,7 @@ let totalPages = async () => {
   } catch (error) {
     console.error(error);
   }
-};
+}
 
 (async function run() {
   try {

@@ -1,9 +1,10 @@
 const fs = require("fs");
 const axios = require("axios");
 const { load } = require("cheerio");
-const url = "https://old.reddit.com/r/unixporn/new";
+const subreddit = "unixporn";
+const url = `https://old.reddit.com/r/${subreddit}/new`;
 let posts = [];
-// let page = 1; /*testing*/
+let page = 1; /*testing*/
 
 async function getImage(postLink) {
   const { data } = await axios(postLink);
@@ -13,9 +14,10 @@ async function getImage(postLink) {
 
 (async function run(url) {
   try {
+    console.log(url);
     const { data } = await axios(url);
     const $ = load(data);
-    $(".thing.linkflair.link").each(async (i, e) => {
+    $(".thing.link").each(async (i, e) => {
       const title = $(e)
         .find(".entry.unvoted .top-matter .title .title")
         .text();
@@ -33,17 +35,18 @@ async function getImage(postLink) {
         image,
         user: { user, profileLink },
       });
-      // page++; /*testing*/
+      page++; /*testing*/
     });
     const nextPage = $(".next-button a").attr("href");
-    // if (page <= 2) { /*testing*/
-    //   await run(nextPage); /*testing*/
-    if (nextPage) {
-      await run(nextPage);
+    if (page <= 2) {
+      /*testing*/
+      await run(nextPage); /*testing*/
+      // if (nextPage) {
+      //   await run(nextPage);
     } else {
       console.log(posts.sort((a, b) => a.id - b.id));
       fs.writeFileSync(
-        "./data/unixporn.json",
+        `./data/${subreddit}.json`,
         JSON.stringify(posts.sort((a, b) => a.id - b.id))
       );
     }
